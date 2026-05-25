@@ -46,6 +46,7 @@ services:
       - frontend
     networks:
       - flavora_net
+      - mailcow_net
 
   certbot:
     image: certbot/certbot:latest
@@ -109,3 +110,6 @@ volumes:
 networks:
   flavora_net:
     driver: bridge
+  mailcow_net:             # এটা যোগ করো
+    external: true
+    name: mailcowdockerized_mailcow-network
