@@ -3,22 +3,30 @@ set -euo pipefail
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_NAME="flavora_mongo_${TIMESTAMP}"
-BACKUP_DIR="/tmp/${BACKUP_NAME}"
-ARCHIVE="${BACKUP_DIR}.tar.gz"
+ARCHIVE="/tmp/${BACKUP_NAME}.tar.gz"
 
+# .env load করো — path আপনার project অনুযায়ী ঠিক করুন
 source /opt/flavora/.env
 
-echo "[$(date)] Starting backup..."
+echo "[$(date)] Starting MongoDB backup..."
 
+# Container-এর ভেতরে dump করো, তারপর host-এ copy করো
 docker exec flavora_mongo mongodump \
   --username="${MONGO_ROOT_USER}" \
   --password="${MONGO_ROOT_PASSWORD}" \
   --authenticationDatabase=admin \
   --db=flavora_food \
-  --out="${BACKUP_DIR}"
+  --out="/tmp/${BACKUP_NAME}"
 
+# Container থেকে host-এ copy করো
+docker cp "flavora_mongo:/tmp/${BACKUP_NAME}" "/tmp/${BACKUP_NAME}"
+
+# Container-এর tmp clean করো
+docker exec flavora_mongo rm -rf "/tmp/${BACKUP_NAME}"
+
+# Archive বানাও
 tar -czf "${ARCHIVE}" -C /tmp "${BACKUP_NAME}"
-rm -rf "${BACKUP_DIR}"
+rm -rf "/tmp/${BACKUP_NAME}"
 
 echo "[$(date)] Uploading to DO Spaces..."
 s3cmd put "${ARCHIVE}" \
@@ -48,4 +56,4 @@ s3cmd ls "s3://${AWS_BUCKET_NAME}/mongodb/" \
 done
 
 rm -f "${ARCHIVE}"
-echo "[$(date)] Backup completed!"
+echo "[$(date)] Backup completed successfully!"
