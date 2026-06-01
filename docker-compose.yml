@@ -62,7 +62,7 @@ services:
     image: mongo:7.0
     container_name: flavora_mongo
     restart: unless-stopped
-    command: ["--replSet", "rs0", "--bind_ip_all"]
+    command: ["--replSet", "rs0", "--bind_ip_all", "--keyFile", "/etc/mongo-keyfile"]
     environment:
       MONGO_INITDB_DATABASE: flavora_food
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
@@ -70,40 +70,12 @@ services:
     volumes:
       - mongo_data:/data/db
       - mongo_config:/data/configdb
+      - ./mongo-keyfile:/etc/mongo-keyfile:ro   # এই লাইন যোগ করো
     expose:
       - '27017'
     networks:
       - flavora_net
-  
-  mongo-init:
-    image: mongo:7.0
-    container_name: flavora_mongo_init
-    restart: "no"
-    command: >
-      bash -c "
-        sleep 10 &&
-        mongosh --host mongo --authenticationDatabase admin -u $$MONGO_ROOT_USER -p $$MONGO_ROOT_PASSWORD --eval '
-          rs.initiate({
-            _id: \"rs0\",
-            members: [{ _id: 0, host: \"mongo:27017\" }]
-          });
-        ' &&
-        mongosh --host mongo --authenticationDatabase admin -u $$MONGO_ROOT_USER -p $$MONGO_ROOT_PASSWORD --eval '
-          while (rs.status().myState !== 1) {
-            print(\"Waiting for MongoDB to become primary...\");
-            sleep(1000);
-          }
-        ';
-      '"
-    environment:
-      MONGO_ROOT_USER: ${MONGO_ROOT_USER}
-      MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-    depends_on:
-      mongo:
-        condition: service_started
-    networks:
-      - flavora_net
-
+      
   redis:
     image: redis:7.2-alpine
     container_name: flavora_redis
