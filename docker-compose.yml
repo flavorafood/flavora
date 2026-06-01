@@ -17,6 +17,7 @@ services:
     networks:
       - flavora_net
 
+
   frontend:
     image: arifbiswas/flavora_food_frontend:latest
     container_name: flavora_website
