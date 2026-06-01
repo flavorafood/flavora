@@ -75,10 +75,11 @@ services:
     networks:
       - flavora_net
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "mongosh", "--authenticationDatabase", "admin", "-u", "${MONGO_ROOT_USER}", "-p", "${MONGO_ROOT_PASSWORD}", "--eval", "db.adminCommand('ping')"]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 5
+      start_period: 30s
   
   mongo-init:
     image: mongo:7.0
@@ -86,20 +87,23 @@ services:
     restart: "no"
     command: >
       bash -c "
-        sleep 5 &&
-        mongosh --host mongo --eval '
+        sleep 10 &&
+        mongosh --host mongo --authenticationDatabase admin -u $$MONGO_ROOT_USER -p $$MONGO_ROOT_PASSWORD --eval '
           rs.initiate({
             _id: \"rs0\",
             members: [{ _id: 0, host: \"mongo:27017\" }]
           });
         ' &&
-        mongosh --host mongo --eval '
+        mongosh --host mongo --authenticationDatabase admin -u $$MONGO_ROOT_USER -p $$MONGO_ROOT_PASSWORD --eval '
           while (rs.status().myState !== 1) {
             print(\"Waiting for MongoDB to become primary...\");
             sleep(1000);
           }
         ';
       '"
+    environment:
+      MONGO_ROOT_USER: ${MONGO_ROOT_USER}
+      MONGO_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
     depends_on:
       mongo:
         condition: service_healthy
