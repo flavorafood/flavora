@@ -5,8 +5,7 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      - NODE_ENV=production
-    command: sh -c "npx prisma db push"
+      - NODE_ENV=production 
     expose:
       - '5000'
       - '5005'
