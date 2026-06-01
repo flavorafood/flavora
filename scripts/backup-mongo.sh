@@ -1,3 +1,4 @@
+sudo tee /opt/flavora/scripts/backup-mongo.sh > /dev/null << 'EOF'
 #!/bin/bash
 set -euo pipefail
 
@@ -5,12 +6,11 @@ TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_NAME="flavora_mongo_${TIMESTAMP}"
 ARCHIVE="/tmp/${BACKUP_NAME}.tar.gz"
 
-# .env load করো — path আপনার project অনুযায়ী ঠিক করুন
 source /opt/flavora/.env
 
-echo "[$(date)] Starting MongoDB backup..."
+echo "[$(date)] Starting backup..."
 
-# Container-এর ভেতরে dump করো, তারপর host-এ copy করো
+# Container-এর ভেতরে dump করো
 docker exec flavora_mongo mongodump \
   --username="${MONGO_ROOT_USER}" \
   --password="${MONGO_ROOT_PASSWORD}" \
@@ -24,7 +24,7 @@ docker cp "flavora_mongo:/tmp/${BACKUP_NAME}" "/tmp/${BACKUP_NAME}"
 # Container-এর tmp clean করো
 docker exec flavora_mongo rm -rf "/tmp/${BACKUP_NAME}"
 
-# Archive বানাও
+# Host-এ archive বানাও
 tar -czf "${ARCHIVE}" -C /tmp "${BACKUP_NAME}"
 rm -rf "/tmp/${BACKUP_NAME}"
 
@@ -56,4 +56,5 @@ s3cmd ls "s3://${AWS_BUCKET_NAME}/mongodb/" \
 done
 
 rm -f "${ARCHIVE}"
-echo "[$(date)] Backup completed successfully!"
+echo "[$(date)] Backup completed!"
+EOF
