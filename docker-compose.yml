@@ -62,7 +62,6 @@ services:
     image: mongo:7.0
     container_name: flavora_mongo
     restart: unless-stopped
-    command: ["mongod", "--bind_ip_all"]
     environment:
       MONGO_INITDB_DATABASE: flavora_food
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
