@@ -62,23 +62,54 @@ services:
     image: mongo:7.0
     container_name: flavora_mongo
     restart: unless-stopped
+
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+
     environment:
       MONGO_INITDB_DATABASE: flavora_food
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+
     volumes:
       - mongo_data:/data/db
       - mongo_config:/data/configdb
+
     expose:
-      - '27017'
+      - "27017"
+
     networks:
       - flavora_net
+
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: >
+        CMD mongosh -u ${MONGO_ROOT_USER} -p ${MONGO_ROOT_PASSWORD}
+        --authenticationDatabase admin
+        --eval "rs.status().ok"
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 20s
+      retries: 10
+      start_period: 30s
+  # mongo:
+  #   image: mongo:7.0
+  #   container_name: flavora_mongo
+  #   restart: unless-stopped
+  #   environment:
+  #     MONGO_INITDB_DATABASE: flavora_food
+  #     MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+  #     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+  #   volumes:
+  #     - mongo_data:/data/db
+  #     - mongo_config:/data/configdb
+  #   expose:
+  #     - '27017'
+  #   networks:
+  #     - flavora_net
+  #   healthcheck:
+  #     test: ["CMD", "mongosh", "-u", "${MONGO_ROOT_USER}", "-p", "${MONGO_ROOT_PASSWORD}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 20s
 
   redis:
     image: redis:7.2-alpine
