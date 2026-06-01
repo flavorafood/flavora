@@ -81,14 +81,11 @@ services:
       - flavora_net
 
     healthcheck:
-      test: >
-        CMD mongosh -u ${MONGO_ROOT_USER} -p ${MONGO_ROOT_PASSWORD}
-        --authenticationDatabase admin
-        --eval "rs.status().ok"
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
+     test: ["CMD", "mongosh", "-u", "${MONGO_ROOT_USER}", "-p", "${MONGO_ROOT_PASSWORD}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
+     interval: 10s
+     timeout: 5s
+     retries: 10
+     start_period: 40s
   # mongo:
   #   image: mongo:7.0
   #   container_name: flavora_mongo
