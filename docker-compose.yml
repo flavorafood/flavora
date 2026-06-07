@@ -6,7 +6,7 @@ services:
     env_file: .env
     environment:
       - NODE_ENV=production 
-      
+    command: sh -c "npx prisma db push"
     expose:
       - '5000'
       - '5005'
