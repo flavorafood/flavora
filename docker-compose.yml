@@ -11,7 +11,7 @@ services:
     expose:
       - '5000'
       - '5005'
-      - '5555:5555'
+      - '5555'
     depends_on:
       mongo:
         condition: service_started
