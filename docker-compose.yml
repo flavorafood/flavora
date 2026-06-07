@@ -6,12 +6,12 @@ services:
     env_file: .env
     environment:
       - NODE_ENV=production 
-      
+
     command: npx prisma studio --hostname 0.0.0.0 --port 5555
     expose:
       - '5000'
       - '5005'
-      - "5555:5555"
+      - '5555:5555'
     depends_on:
       mongo:
         condition: service_started
