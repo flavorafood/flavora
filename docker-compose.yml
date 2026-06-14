@@ -86,7 +86,7 @@ services:
     image: mongo:7.0
     container_name: flavora_mongo_init
     restart: "no"
-    command: >
+    command: |
       bash -c "
         sleep 10 &&
         mongosh --host mongo --authenticationDatabase admin -u $$MONGO_ROOT_USER -p $$MONGO_ROOT_PASSWORD --eval '
@@ -113,7 +113,7 @@ services:
       --appendonly yes
       --requirepass ${REDIS_PASSWORD}
       --maxmemory 256mb
-      --maxmemory-policy allkeys-lru
+      --maxmemory-policy noeviction
     volumes:
       - redis_data:/data
     expose:
